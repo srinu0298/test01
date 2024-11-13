@@ -1,1 +1,1300 @@
-#srinu
+ DAY-3
+
+
+
+1.
+
+Exercise_Union_SelectiveInvoices
+
+select INVOICEID,QUANTITYPURCHASED,DISCOUNT FROM INVOICE
+
+WHERE SUBSTR(PRODUCTID,LENGTH(PRODUCTID))<5 UNION ALL
+
+select INVOICEID,QUANTITYPURCHASED,DISCOUNT FROM INVOICE
+
+WHERE DISCOUNT<10;
+
+2.Exercise_Union_SelectiveProducts
+
+SELECT PNAME,BRAND FROM PRODUCT WHERE COLOR NOT IN ('Brown' ,'Yellow')
+
+union
+
+SELECT PNAME,BRAND FROM PRODUCT where Review <> 'Bad';
+
+3.Exercise_Union_FilterVendors
+
+select* FROM VENDOR WHERE RATING>3 AND VENDORCONTACTNO IS NOT NULL
+
+UNION ALL
+
+select* FROM VENDOR WHERE VENDORNAME LIKE '%a%' AND VENDORCONTACTNO IS NOT NULL;
+
+4.Assignment_CombiningData_E
+
+select PUBLISHERID FROM Publisher except select PUBLISHERID from Journal;
+
+5.Exercise_Join_SelectiveCustomers
+
+select p.productid as "Product Id",PName as "Product Name",PCategory as "Category" from
+
+Product p inner join invoice i
+
+on p.productid=i.productid
+
+where i.custid in ('C101','C108');
+
+6.Exercise_InnerJoin_SelectiveAgeGroup
+
+select c.CustId "Customer ID",c.custname "Customer Name",i.ProductId "Product ID"
+
+from Customer c inner join invoice i
+
+on c.CustId=i.CustId
+
+where age>35;
+
+7.Exercise_Join_ConditionOnMonth
+
+select distinct c.CustId,c.CustName
+
+from
+
+customer c inner join invoice i
+
+on c.custid=i.custid
+
+where month(PURCHASEDATE)=08;
+
+8.Exercise_Join_CategoryWiseCount
+
+select PCATEGORY,COUNT(i.ProductId) "NUMBER_OF_PRODUCTS"
+
+ FROM PRODUCT p left join invoice i on
+
+ p.ProductId=i.ProductId
+
+group by PCATEGORY;
+
+9.Exercise_Join_SelectiveColorProducts
+
+select VENDORID,PNAME,COLOR,FLOOR(PRICE) "BASEPRICE"
+
+from
+
+product p left join VendorOffering v on
+
+p.productid=v.productid
+
+WHERE COLOR IN ('White','Blue');
+
+10.Exercise_Join_CategoryWiseSelectiveCount
+
+select p.PCategory"Category",count(p.REVIEW) "Total Products"
+
+from
+
+Product p left join invoice v on
+
+p.Productid=v.Productid
+
+where QuantityPurchased>8 AND REVIEW='Good'
+
+group by "Category";
+
+11.Exercise_Join_SelectiveVendors
+
+select VENDORNAME,ProductId "PRODUCTID",Price "PRICE"
+
+from Vendor v left join VendorOffering ve on
+
+v.vendorId=ve.vendorId
+
+Where length(VENDORNAME)>15 and Price>1000;
+
+12.Exercise_Join_DiscountCalculation
+
+13.Exercise_Join_GB_OB
+
+Select c.CustLocation "LOCATION", distinct(BRAND),i.QuantityPurchased AS "PRODUCTSSOLD"
+
+from Customer c inner join Invoice i on
+
+ c.CUSTID=I.CUSTID
+
+ inner JOIN Product p on
+
+ p.ProductId=i.ProductId
+
+ ORDER BY "LOCATION" ASC , BRAND ASC;
+
+======================================
+
+
+
+Assignment_CombiningData_E:
+
+
+
+select publisherid from publisher except
+
+select publisherid from journal;
+
+================================================================
+
+Assignment_Join_AndOr:
+
+select distinct c.customerid,c.customername from customer c
+
+inner join subscription s on c.customerid=s.customerid where c.customertype='Regular' or c.customertype='Prime';
+
+================================================================
+
+Assignment_Join_Where:
+
+select j.journalid,p.publishername from journal j
+
+inner join publisher p
+
+on p.publisherid=j.publisherid
+
+where p.contactno is not null;
+
+================================================================
+
+Assignment_Join_CustomerWiseSubscriptionCount:
+
+select c.customerid,c.customername, count(*) "SUBSCRIPTIONCOUNT"
+
+from customer c
+
+inner join subscription s
+
+on c.customerid=s.customerid
+
+group by c.customerid,c.customername
+
+having count(*)>1;
+
+=================================================================
+
+Assignment_Join_FilterStartdate:
+
+select c.customername,j.journalname,s.startdate,s.durationinmonths
+
+from customer c join subscription s on c.customerid=s.customerid
+
+join journal j on s.journalid=j.journalid
+
+where s.startdate<='2023-11-01';
+
+===================================================================
+
+Assignment_Join_SelectiveJournals:
+
+select j.journalname,j.genre from journal j
+
+join subscription s on j.journalid=s.journalid
+
+where discountpercent>10;
+
+===================================================================
+
+Assignment_Join_SameGenre_DifferentPublisher:
+
+select distinct publishername,genre,rating from
+
+publisher p inner join journal j on p.publisherid=j.publisherid
+
+inner join journal j2 on
+
+j.genre=j2.genre and j2.journalid <> j.journalid;
+
+===================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+------------------------------------------------------------------------------------------------------------------------------------
+
+DAY 4
+
+
+
+SUB_QUERY:
+
+
+
+Exercise_Subquery_MaxAvgDiscount:
+
+select max(avg_discount) "MAX_DISCOUNT"
+
+from (select productid,avg(discount) avg_discount from invoice group by productid)
+
+as subquery
+
+------------------------------------------------------------------
+
+Exercise_Subquery_MaxCount:
+
+select max(purchase_count) as "MAX_PURCHASES"
+
+from
+
+(select custid,count(productid) as purchase_count from invoice group by custid) as subquery
+
+----------------------------------------------------------------
+
+Exercise_Subquery_MaxPurchaseDate:
+
+select invoiceid,purchasedate from invoice
+
+where purchasedate = (select max(purchasedate) purchase from invoice)
+
+----------------------------------------------------------------
+
+Exercise_Subquery_AvgPrice:
+
+select productid,avg(price) "AVERAGEPRICE" from vendoroffering
+
+where price> (select avg(price) avg_price from vendoroffering)
+
+group by productid
+
+----------------------------------------------------------------
+
+Exercise_Subquery_Having:
+
+select productid from invoice group by productid
+
+having avg(discount) > (select avg(discount) dis from invoice where productid = 'P101' )
+
+----------------------------------------------------------------
+
+Exercise_GroupBy_MinTotalQuantity:
+
+select productid from invoice group by productid
+
+having sum(quantitypurchased) = (select min(quantity) from
+
+(select custid,sum(quantitypurchased) quantity from invoice group by custid))
+
+----------------------------------------------------------------
+
+Exercise_Subquery_MinTotalQty:
+
+select productid from invoice group by productid
+
+having sum(quantitypurchased) = (select min(quantity) from
+
+(select productid,sum(quantitypurchased) quantity from invoice group by productid))
+
+----------------------------------------------------------------
+
+Exercise_Subquery_MinTotalQuantity:
+
+select productid,pname
+
+from product p inner join invoice i on p.productid = i.productid
+
+group by productid
+
+having sum(quantitypurchased) = (select min(quantity) from
+
+(select productid,sum(quantitypurchased) quantity from invoice group by productid))
+
+----------------------------------------------------------------
+
+Exercise_Correlated_ThirdCostliest:
+
+select vendorid,productid,price from vendoroffering v1
+
+where (select count(distinct price) from vendoroffering v2 where v2.price > v1.price) = 2
+
+----------------------------------------------------------------
+
+Exercise_Subquery_UnSoldProducts:
+
+select productid,pcategory,brand from product p
+
+where not exists (select custid from invoice i where p.productid=i.productid )
+
+-------------------------------------------------------------------
+
+ASSIGNMENTS:
+
+Assignment_Subquery_SubscribedJournals:
+
+select distinct journalid,journalname,genre from journal j
+
+where journalid in (select journalid from subscription)
+
+----------------------------------------------------------------
+
+Assignment_Subquery_JoinstoSubsquery:
+
+select distinct journalname,genre from journal j
+
+where journalid in (select journalid from subscription)
+
+----------------------------------------------------------------
+
+Assignment_Subquery_RoundedAvgRating:
+
+select round(avg) "RATING" from (select avg(rating) avg from publisher)
+
+----------------------------------------------------------------
+
+Assignment_Subquery_SelectiveCustomers
+
+select customerid,customername,state from customer c
+
+where state = (select state from customer where customername='Robert')
+
+and customername != 'Robert'
+
+----------------------------------------------------------------
+
+Assignment_Subquery_CustomerWith>1Subscription:
+
+select customerid,customername from customer
+
+where customerid in (select customerid from subscription
+
+group by customerid having count(subscriptionid)>1)
+
+----------------------------------------------------------------
+
+Assignment_Subquery_MinMonthlyCharges:
+
+select publisherid,publishername from publisher
+
+where publisherid in
+
+(select publisherid from journal where monthlycharges =
+
+(select min(monthlycharges) from journal))
+
+----------------------------------------------------------------
+
+Assignment_Subquery_MinMonthlyChargesOfTradeGenre:
+
+select publisherid,publishername from publisher
+
+where publisherid in
+
+(select publisherid from journal where monthlycharges =
+
+(select min(monthlycharges) from journal where genre='Trade'))
+
+----------------------------------------------------------------
+
+Assignment_Subquery_MaxMonthlyChargesOfTradeGenre:
+
+select journalname,monthlycharges from journal
+
+where monthlycharges =
+
+(select max(monthlycharges) from journal where genre='Trade')
+
+----------------------------------------------------------------
+
+Assignment_Subquery_CustomerFromSameStateDiffCity:
+
+select state,city,customername from customer c
+
+where state in (select state from customer cs where c.state=cs.state and c.city<>cs.city
+
+group by cs.state) order by state
+
+----------------------------------------------------------------
+
+Assignment_Subquery_SelectiveSubscriptions:
+
+select subscriptionid,journalid from subscription s
+
+where discountpercent <=
+
+(select avg(discountpercent) from subscription sc where s.journalid=sc.journalid)
+
+----------------------------------------------------------------
+
+Assignment_Subquery_CustomerSubscriptions
+
+select customerid,customername,startdate
+
+from customer c inner join subscription s on c.customerid = s.customerid
+
+where discountpercent < (select max(discountpercent) from subscription sc where s.startdate=sc.startdate)
+
+group by customerid,customername,startdate
+
+----------------------------------------------------------------
+
+Assignment_Subquery_Subscriptions:
+
+select customername,state,durationinmonths
+
+from customer c inner join subscription s on c.customerid=s.customerid
+
+where discountpercent > (select min(discountpercent) from subscription sc where s.customerid=sc.customerid)
+
+----------------------------------------------------------------
+
+Assignment_Subquery_CustomerWithNoSubscription:
+
+select customerid,customername from customer c
+
+where not exists (select journalid from subscription s where c.customerid=s.customerid)
+
+----------------------------------------------------------------
+
+Assignment_Subquery_UniqueDiscountPerCustomer:
+
+select distinct customername,discountpercent
+
+from customer c inner join subscription s on c.customerid=s.customerid
+
+where discountpercent < (select max(discountpercent) from subscription sc
+
+where s.journalid=sc.journalid and s.customerid <> sc.customerid)
+
+----------------------------------------------------------------
+
+Assignment_Subquery_MaxMonthlyChargesPerGenre:
+
+select journalid,journalname,genre,monthlycharges from journal j
+
+where monthlycharges = (select max(monthlycharges) from journal js where js.genre= j.genre )
+
+----------------------------------------------------------------
+
+Assignment_Subquery_UpdateMonthlyCharges:
+
+update journal j
+
+set monthlycharges = (select avg(monthlycharges) from journal js
+
+where j.publisherid=js.publisherid)
+
+where j.publisherid is not null
+
+----------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+                             JAVA
+
+                          ===========
+
+
+
+
+
+Assignment1:
+
+------------
+
+public class Assignment1 {
+
+ public static void main(String[] args) {
+
+ int reverse=0;
+
+ int num=27;
+
+
+
+ //while loop
+
+ while(num!=0) {
+
+ int remainder= num%10;
+
+ reverse=reverse*10+remainder;
+
+ num=num/10;
+
+ }
+
+ System.out.println("The reverse of the number using while is: "+reverse);
+
+
+
+ //Do-while loop
+
+ do {
+
+ int remainder=num%10;
+
+ reverse=reverse+remainder;
+
+ num=num/10;
+
+ }while(num>0);
+
+ System.out.println("The reverse of the number using do while is: "+reverse);
+
+
+
+ //for loop
+
+ for(;num!=0;num=num/10) {
+
+ int remainder=num%10;
+
+ reverse=reverse*10+remainder;
+
+ num=num/10;
+
+ }
+
+ System.out.println("The reverse of the number using for is: "+reverse);
+
+ }
+
+ }
+
+Assignment 2:
+
+-------------
+
+import java.util.Scanner;
+
+public class Assignment2 {
+
+ public static void main(String[] args) {
+
+ int option;
+
+ Scanner SC = new Scanner(System.in);
+
+ System.out.println("1. Calculate Armstorng Number");
+
+ System.out.println("2. Calculate Lucky Number");
+
+ System.out.println("Enter your choice :");
+
+ option=SC.nextInt();
+
+ switch(option)
+
+ {
+
+ case 1:
+
+ System.out.println("Your choice is "+option);
+
+ System.out.println("The number 153 is an Armstrong number");
+
+ break;
+
+ case 2:
+
+ System.out.println("Your choice is "+option);
+
+ System.out.println("The number 1623 is Lucky number");
+
+ break;
+
+ default:
+
+ System.out.println("Oops! Invalid choice!");
+
+ break;
+
+ }
+
+        SC.close();
+
+ }
+
+ }
+
+Assignment3:
+
+------------
+
+public class Assignment3 {
+
+ public static void main(String[] args) {
+
+ double[] sal= {23500.0, 25080.0, 28760.0, 22340.0, 19890.0};
+
+ double sum = 0.0;
+
+ double excess =0, downFall =0;
+
+ for(int i=0; i<sal.length;i++)
+
+ {
+
+ sum=sum+sal[i];
+
+ }
+
+ double average = sum/sal.length;
+
+ System.out.println("The Average salary of the employee is: "+average);
+
+ for(int i=0; i<sal.length; i++)
+
+ {
+
+ if(sal[i]>average)
+
+ {
+
+ excess++;
+
+ }
+
+ else if (sal[i]<average)
+
+ {
+
+ downFall++;
+
+ }
+
+ }
+
+ System.out.println("The number of employees having salary greater than the average is: "+excess);
+
+ System.out.println("The number of employees having salary lesser than the average is " +downFall);
+
+ }
+
+ }
+
+Assignment4:
+
+------------
+
+public class Assignment4 {
+
+ int marks[] = new int[5];
+
+ public int[] storeMarks()
+
+ {
+
+ marks[0]=70;
+
+ marks[1]=89;
+
+ marks[2]=76;
+
+ marks[3]=57;
+
+ marks[4]=98;
+
+ return marks;
+
+ }
+
+ public void getMarks()
+
+ {
+
+ for(int i:marks)
+
+ {
+
+ System.out.println(i+" ");
+
+ }
+
+ }
+
+ public static void main(String[] args) {
+
+ Assignment4 object=new Assignment4();
+
+ object.storeMarks();
+
+ object.getMarks();
+
+ }
+
+}
+
+
+
+-------------------------------------------------------
+
+
+
+
+
+
+
+package Exercises;
+
+
+
+import java.util.Scanner;
+
+public class ReverseCalculator {
+
+ public static void main(String[] args) {
+
+ Scanner sc = new Scanner(System.in);
+
+ System.out.println("Enter a Number:");
+
+ int n = sc.nextInt();
+
+ int reversed = 0;
+
+ int org_num = n;
+
+ int rev = 0;
+
+ while(n!=0) {
+
+  rev= rev *10 + n%10;
+
+  n = n/10;
+
+ }
+
+ System.out.println("Reverse Number is: " + rev);
+
+ for (;n != 0; n /= 10) {
+
+      int digit = n % 10;
+
+      reversed = reversed * 10 + digit;
+
+      System.out.println("Reverse Number is: " + reversed);
+
+    }
+
+ do {
+
+  int rem = n % 10;
+
+  reversed = reversed * 10+ rem;
+
+  n = n/10;
+
+  System.out.println("Reverse Number is: " + reversed);
+
+ } while (n!=0);
+
+ }
+
+}
+
+
+
+package Assignments;
+
+
+
+import java.util.Scanner;
+
+public class Apple_boxes {
+
+ public static void main(String[] args) {
+
+  Scanner sc = new Scanner(System.in);
+
+  int Box_Price = 100;
+
+  System.out.println("Enter the no of Boxes Required:");
+
+   int boxes = sc.nextInt();
+
+   if (boxes <=0) {
+
+    System.out.println("Invalid Number! Number of boxes must be greater than 0");
+
+   } else {
+
+    double billAmount = boxes * Box_Price;
+
+    double discount = 0.0;
+
+   if(billAmount>=500 && billAmount<=1000) {
+
+    discount= 0.05* billAmount;
+
+   }
+
+   else if(billAmount>=1000 && billAmount < 2000)
+
+   {
+
+    discount= 0.10* billAmount;
+
+   }
+
+   else if (billAmount >= 2000) {
+
+    discount= 0.20* billAmount;
+
+   }
+
+   double finalBill = billAmount- discount;
+
+   System.out.println("Initial BillAmount: "+billAmount);
+
+   System.out.println("Disount Applied: "+discount);
+
+   System.out.println("Final Bill Amount: "+finalBill);
+
+   }
+
+ }
+
+}
+
+package Assignments;
+
+import java.util.Scanner;
+
+public class ArmstrongCheck {
+
+ public static void main(String[] args) {
+
+ // TODO Auto-generated method stub
+
+  Scanner sc = new Scanner(System.in);
+
+  System.out.println("Enter the Number N:");
+
+  int N = sc.nextInt();
+
+  int originalNumber = N;
+
+  int sum = 0;
+
+  //Calculate the sum of te cubes of each digit
+
+  while (N > 0) {
+
+  int digit = N % 10;
+
+  sum += digit * digit * digit;
+
+  N /=10;
+
+  }
+
+  //check if the sum of cubes of digits is equal to the original number
+
+  boolean isArmstrong = (sum == originalNumber);
+
+  System.out.println(isArmstrong);
+
+ }
+
+}
+
+package Assignments;
+
+import java.util.Scanner;
+
+public class Fibonnaci_Series {
+
+ public static void main(String[] args) {
+
+     Scanner sc = new Scanner(System.in);
+
+ System.out.println("Enter the Number of terms:");
+
+ int N = sc.nextInt();
+
+ //Check if N is within the range or not
+
+ if(N < 1 || N > 1000000) {
+
+  System.out.println("N should be between 1 and 10^6");
+
+ } else {
+
+  //Print Fibonacci series up to N terms
+
+  long firstterm = 0, secondterm = 1;
+
+  for(int i = 1; i <=N ; i++ ) {
+
+  System.out.println(firstterm+" ");
+
+  //calculate the next term in the series
+
+  long nextterm = firstterm +secondterm;
+
+  firstterm = secondterm;
+
+  secondterm = nextterm;
+
+  }
+
+ }
+
+ }
+
+}
+
+package Assignments;
+
+import java.util.Scanner;
+
+public class Mobile_Number {
+
+ public static void main(String[] args) {
+
+ Scanner sc = new Scanner(System.in);
+
+ System.out.println("Enter Phone Number:");
+
+ long Num = sc.nextLong();
+
+ boolean isValid = (Num>=1000000000l && Num <=9999999999l);
+
+ System.out.println(isValid);
+
+ }
+
+}
+
+package Assignments;
+
+import java.util.Scanner;
+
+public class PyramidPattern {
+
+ public static void main(String[] args) {
+
+ Scanner sc = new Scanner(System.in);
+
+ System.out.println("Enter a Value:");
+
+ int rows = sc.nextInt();
+
+ for (int i = 1; i <= rows; i++) {
+
+      // Print spaces
+
+      for (int j = rows; j > i; j--) {
+
+        System.out.print(" ");
+
+      }
+
+      // Print stars
+
+      for (int k = 1; k <= (2 * i - 1); k++) {
+
+        System.out.print("*");
+
+      }
+
+      // Move to the next line
+
+      System.out.println();
+
+    }
+
+ }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+assignment day2
+
+==============
+
+
+
+
+
+Assignment 1:
+
+-------------
+
+public class Constructor {
+
+ int studentId;
+
+ String studentName;
+
+ public Constructor() {
+
+ this.studentId=0000;
+
+ this.studentName="Default";
+
+ }
+
+ public Constructor(int studentId, String studentName) {
+
+ this.studentId= studentId;
+
+ this.studentName= studentName;
+
+ }
+
+ public Constructor(int studentId) {
+
+ this.studentId= studentId;
+
+ }
+
+ public Constructor(String studentName) {
+
+ this.studentName= studentName;
+
+ }
+
+ public void display() {
+
+ System.out.println(studentId+" "+studentName);
+
+ }
+
+ public static void main(String[] args) {
+
+ Constructor stu = new Constructor();
+
+ Constructor stu2 = new Constructor(0001,"John");
+
+ Constructor stu3 = new Constructor(0003);
+
+ Constructor stu4 = new Constructor("Peter");
+
+ stu.display();
+
+ stu2.display();
+
+ stu3.display();
+
+ stu4.display();
+
+ }
+
+}
+
+Assignment 2:
+
+-------------
+
+public class Choclate_Tester {
+
+ public static void main(String[] args) {
+
+ choclate ch = new choclate();
+
+ ch.setbarCode(1002);
+
+ ch.setcost(12);
+
+ ch.setName("Hersheys");
+
+ ch.setweight(35);
+
+ ch.display();
+
+ }
+
+}
+
+class choclate{
+
+ private int barCode;
+
+ private String name;
+
+ private int weight;
+
+ private int cost;
+
+ public choclate() {
+
+ this.barCode =101;
+
+ this.name ="cadbury";
+
+ this.weight =12;
+
+ this.cost =10;
+
+ }
+
+ public int getbarCode() {
+
+ return barCode;
+
+ }
+
+ public void setbarCode(int barCode) {
+
+ this.barCode = barCode;
+
+ }
+
+ public String getName() {
+
+ return name;
+
+ }
+
+ public void setName(String name) {
+
+ this.name = name;
+
+ }
+
+ public int getweight() {
+
+ return weight;
+
+ }
+
+ public void setweight(int weight) {
+
+ this.weight = weight;
+
+ }
+
+ public int getcost() {
+
+ return cost;
+
+ }
+
+ public void setcost(int cost) {
+
+ this.cost = cost;
+
+ }
+
+ public void display() {
+
+ System.out.println(barCode+" "+name+" "+weight+" "+cost);
+
+ }
+
+ }
+
+Assignment 3:
+
+----
+[13/11, 09:12] Srinu The Rock: +"Total Marks :"+this.totalMarks;
+
+}
+
+public static void main(String[] args) {
+
+Set StudentList = new TreeSet<>(new TotalMarksCompare());
+
+StudentList.add(new Student("Alpha",49));
+
+StudentList.add(new Student("Beta",68));
+
+StudentList.add(new Student("Gamma",59));
+
+StudentList.add(new Student("Delta",77));
+
+StudentList.add(new Student("Omega",36));
+
+List list = new ArrayList(StudentList);
+
+Collections.sort(list);
+
+System.out.println(list);
+
+}
+
+}
+
+
+
+
+
+
+
+
+
+-------------------------------
+
+package day5Assignments;
+
+
+
+public class TestGeneric {
+
+ // define printArray method
+
+ public <t> void printArray(t[] list) {
+
+ for(int i = 0; i < list.length; i++) {
+
+ System.out.print(list[i]+" ");
+
+ }
+
+ System.out.println();
+
+ }
+
+ public static void main(String[] args) {
+
+ Integer[] arrInteger = { 10, 20, 30, 40, 50, 60 };
+
+ Character[] arrChar = { 'I', 'N', 'F', 'O', 'S', 'Y', 'S' };
+
+ Double[] arrDouble = { 100.1, 200.1, 300.1, 400.1, 500.1, 600.1 };
+
+ TestGeneric tg = new TestGeneric();
+
+ tg.printArray(arrInteger);
+
+ tg.printArray(arrChar);
+
+ tg.printArray(arrDouble);
+
+ }
+
+ }
